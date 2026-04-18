@@ -103,6 +103,7 @@ class BeerControllerComponentTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getHeaders().getLocation()).isNotNull();
 
+
         BeerDTO body = response.getBody();
         assertThat(body).isNotNull();
         assertThat(body.getBeerId()).isNotNull();
