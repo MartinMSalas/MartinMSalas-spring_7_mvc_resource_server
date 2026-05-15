@@ -1,0 +1,101 @@
+package com.esparta.spring7restmvcresourceserver.entities;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+/*
+ * Author: M
+ * Date: 25-Jan-26
+ * Project Name: spring-7-rest-mvc-resource-server
+ * Description: beExcellent
+ */
+
+@Entity
+@Table(name = "customer")
+@EntityListeners(AuditingEntityListener.class)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Customer {
+
+    @Id
+    @UuidGenerator
+    @JdbcTypeCode(org.hibernate.type.SqlTypes.CHAR)
+    @Column(name = "customer_id", columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    private UUID customerId;
+
+    @Column(nullable = false)
+    private String customerName;
+
+
+    @Column()
+    private String email;
+
+    // =========================
+    //     RELATIONSHIPS
+    // ==========================
+
+
+    @Builder.Default
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.PERSIST)
+    private Set<BeerOrder> beerOrders = new HashSet<>();
+
+    // =========================
+    //     CONVENIENCE METHODS
+    // =========================
+    public void addBeerOrder(BeerOrder order) {
+        beerOrders.add(order);
+        order.setCustomer(this);
+    }
+
+    public void removeBeerOrder(BeerOrder order) {
+        beerOrders.remove(order);
+        order.setCustomer(null);
+    }
+    /* =========================
+       AUDITING
+       ========================= */
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private Instant createdDate;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    private Instant lastModifiedDate;
+
+    /* =========================
+       OPTIMISTIC LOCKING
+       ========================= */
+
+    @Version
+    private Long version;
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "createdDate=" + createdDate +
+                ", customerId=" + customerId +
+                ", customerName='" + customerName + '\'' +
+                ", email='" + email + '\'' +
+                ", lastModifiedDate=" + lastModifiedDate +
+                ", version=" + version +
+                '}';
+    }
+}
